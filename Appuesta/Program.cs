@@ -17,13 +17,13 @@ namespace Appuesta
             string nombreLocal, nombreVisitante;
             string bajaLocal , competenciaLocal, necesidadLocal;
             string bajaVisitante, competenciaVisitante, necesidadVisitante;
-            int puntosLocal, puntosVisitante;
             char[] resultados1 = new char[5];
             char[] resultados2 = new char[5];
             double porcentajeLocal, porcentajeVisitante;
             //Empieza con 10 por ser local
-            int ventajaLocal = 15;
+            int ventajaLocal = 10;
             int ventajaVisitante = 0;
+            double efectividadVisitante, efectividadLocal;
 
             //Ingreso de nombres de equipos
             string ingresoNombre(string nombre)
@@ -47,54 +47,52 @@ namespace Appuesta
                 }
                 return ((partidosGanados / 5.0) * 100);
             }
-          
+
+            double calcularPorcentajeEfectividad()
+            {
+                double fechasJugadas, puntosObtenidos, puntosTotales;
+                Console.WriteLine("Ingrese cantidad de fechas jugadas en el torneo");
+                fechasJugadas = int.Parse(Console.ReadLine());
+                puntosTotales = fechasJugadas * 3; 
+                Console.WriteLine("Ingrese cantidad de puntos obtenidos");
+                puntosObtenidos = int.Parse(Console.ReadLine());
+                return ((puntosObtenidos / puntosTotales) * 100.0);
+            }
+
             //Ingreso de resultados de equipos en un arreglo. 
             void ingresoResultados(char[] resultado) 
             {
                 for (int i = 0; i < 5; i++)
                 {
-                    resultado[i] = Console.ReadKey().KeyChar;
-                    if (i != 4) 
+                    do
                     {
-                        Console.Write(" - ");
-                    }
+                        resultado[i] = char.ToUpper(Console.ReadKey().KeyChar);
+                        if (i != 4)
+                        {
+                            Console.Write(" - ");
+                        }
+                    } while (resultado[i] != 'G' && resultado[i] != 'E' && resultado[i] != 'P');
                 }
                 Console.WriteLine();
             }
 
-            int bajasImportantes() 
+            int menuSiNo(string mensaje,int valorSi, int valorNo) 
             {
-                Console.WriteLine("Tiene bajas importantes para el encuentro?(Convocatoria / lesion / suspension)");
-                Console.WriteLine("1. Si");
-                Console.WriteLine("2. No");
-                respuesta = Console.ReadKey().KeyChar;
-                Console.WriteLine();
+                do
+                {
+                    Console.Clear();
+                    Console.WriteLine(mensaje);
+                    Console.WriteLine("1. Si");
+                    Console.WriteLine("2. No");
+                    respuesta = Console.ReadKey().KeyChar;
+                    Console.WriteLine();
+                } while (respuesta != '1' && respuesta != '2');
                 return respuesta == '1' ? 10 : 20;
             }
 
             string respuestaMenu() 
             {
                 return (respuesta == '1') ? "Si": "No";
-            }
-
-            int competenciaInternacional() 
-            {
-                Console.WriteLine("Competencia internacional proxima");
-                Console.WriteLine("1. Si");
-                Console.WriteLine("2. No");
-                respuesta = Console.ReadKey().KeyChar;
-                Console.WriteLine();
-                return respuesta == '1' ? 10 : 20;
-            }
-
-            int necesidadResultado() 
-            {
-                Console.WriteLine("Tiene necesidad del resultado?");
-                Console.WriteLine("1. Si");
-                Console.WriteLine("2. No");
-                respuesta = Console.ReadKey().KeyChar;
-                Console.WriteLine();
-                return respuesta == '1' ? 20 : 10;
             }
 
             int diferenciaNotoriaPorcentajes() 
@@ -107,40 +105,21 @@ namespace Appuesta
                 return (Math.Abs(local - visitante) > condicion) ? valorTrue : valorFalse;
             }
 
-            void compararPuntos()
+            void comparar(double opcionA, double opcionB, string textoComparacion) 
             {
-                if (puntosLocal > puntosVisitante)
+                if (opcionA > opcionB)
                 {
-                    Console.WriteLine($"{nombreLocal} tiene mas puntos ({puntosLocal} vs {puntosVisitante})");
-                    ventajaLocal += diferenciaNotoria(puntosLocal, puntosVisitante, 7, 20, 0);
-                }
-                else if (puntosLocal < puntosVisitante)
-                {
-                    Console.WriteLine($"{nombreVisitante} tiene mas puntos ({puntosVisitante} vs {puntosLocal})");
-                    ventajaVisitante += diferenciaNotoria(puntosLocal, puntosVisitante, 7, 20, 0);
-                }
-                else
-                {
-                    Console.WriteLine("Igualan en puntos");
-                }
-
-            }
-
-            void compararPorcentajes()
-            {
-                if (porcentajeLocal > porcentajeVisitante)
-                {
-                    Console.WriteLine($"{nombreLocal} tiene mayor porcentaje de victorias ({porcentajeLocal}% vs {porcentajeVisitante}%)");
+                    Console.WriteLine($"{nombreLocal} tiene mayor porcentaje de {textoComparacion}({opcionA.ToString("F2")}% vs {opcionB.ToString("F2")}%)");
                     ventajaLocal += diferenciaNotoriaPorcentajes();
                 }
-                else if (porcentajeLocal < porcentajeVisitante)
+                else if (opcionA < opcionB)
                 {
-                    Console.WriteLine($"{nombreVisitante} tiene mayor porcentaje de victorias ({porcentajeVisitante}% vs {porcentajeLocal}%)");
-                    ventajaVisitante += diferenciaNotoriaPorcentajes();
+                    Console.WriteLine($"{nombreVisitante} tiene mayor porcentaje de {textoComparacion}({opcionA.ToString("F2")}% vs {opcionB.ToString("F2")}%)");
+                    ventajaLocal += diferenciaNotoriaPorcentajes();
                 }
-                else
+                else 
                 {
-                    Console.WriteLine("Igualan en porcentaje de victorias");
+                    Console.WriteLine($"Igualan en porcentaje de {textoComparacion}");
                 }
             }
 
@@ -184,38 +163,24 @@ namespace Appuesta
                 }
             }
 
-            void mostrarIngresosLocal() 
+            void mostrarIngresos(string nombre, string baja, string competencia, string necesidad, double efectividad, char[] resultados)
             {
-                Console.WriteLine($"Nombre equipo local: {nombreLocal}");
-                Console.WriteLine($"Bajas importantes: {bajaLocal}");
-                Console.WriteLine($"CompetenciaInternacional: {competenciaLocal} ");
-                Console.WriteLine($"Necesidad de resultado: {necesidadLocal} ");
-                Console.WriteLine($"Puntos en liga actual: {puntosLocal} ");
+                Console.WriteLine($"Nombre equipo local: {nombre}");
+                Console.WriteLine($"Bajas importantes: {baja}");
+                Console.WriteLine($"CompetenciaInternacional: {competencia} ");
+                Console.WriteLine($"Necesidad de resultado: {necesidad} ");
+                Console.WriteLine($"Efectividad local: {efectividad.ToString("F2")}%");
                 Console.Write($"Ultimos resultados: ");
                 for (int i = 0; i < 5; i++)
                 {
                     if (i < 4)
                     {
-                        Console.Write($"{resultados1[i]} - ");
+                        Console.Write($"{resultados[i]} - ");
                     }
-                    else 
+                    else
                     {
-                        Console.Write($"{resultados1[i]} ");
+                        Console.Write($"{resultados[i]} ");
                     }
-                }
-                Console.WriteLine();
-            }
-            void mostrarIngresosVisitante()
-            {
-                Console.WriteLine($"Nombre equipo local: {nombreVisitante}");
-                Console.WriteLine($"Bajas importantes: {bajaVisitante}");
-                Console.WriteLine($"CompetenciaInternacional: {competenciaVisitante} ");
-                Console.WriteLine($"Necesidad de resultado: {necesidadVisitante} ");
-                Console.WriteLine($"Puntos en liga actual: {puntosVisitante} ");
-                Console.Write($"Ultimos resultados: ");
-                for (int i = 0; i < 5; i++)
-                {
-                    Console.Write($"{resultados2[i]} - ");
                 }
                 Console.WriteLine();
             }
@@ -231,24 +196,21 @@ namespace Appuesta
                 Console.WriteLine("6. Ultimos partidos ");
             }
 
-            void eleccionModificar()
+            void eleccionModificar(ref string nombre,ref string baja,ref string competencia,ref string necesidad)
             {
                 switch (opcionModificar)
                 {
                     case '1': 
-                        nombreLocal = ingresoNombre("Equipo local");
+                        nombre = ingresoNombre("Equipo local");
                         break;
-                    case '2': 
-                        bajasImportantes();
+                    case '2':
+                        cambiarRespuesta(ref baja);
                         break;
-                    case '3': 
-                        competenciaInternacional();
+                    case '3':
+                        cambiarRespuesta(ref competencia);
                         break;
-                    case '4': 
-                        necesidadResultado();
-                        break;
-                    case '5': 
-                        ingresoPuntosLocal(); ;
+                    case '4':
+                        cambiarRespuesta(ref necesidad);
                         break;
                     case '6': 
                         ingresoResultadoslocal();
@@ -257,75 +219,115 @@ namespace Appuesta
                         break;
                 }
             }
-
-            void ingresoPuntosLocal() 
-            {
-                Console.WriteLine("Indique cantidad de puntos liga actual");
-                puntosLocal = int.Parse(Console.ReadLine());
-            }
             void ingresoResultadoslocal() 
             {
                 Console.WriteLine($"Ingrese ultimos 5 resultados de {nombreLocal} (G / E / P)");
                 ingresoResultados(resultados1);
             }
+            void cambiarRespuesta(ref string res) 
+            {
+                if (res == "Si")
+                {
+                    res = "No";
+                }
+                else 
+                {
+                    res = "Si";
+                }
+            }
             //Programa principal
             do
             {
+                Console.Clear();
+                
                 //Equipo local 
                 nombreLocal = ingresoNombre("Equipo local");
-                ventajaLocal += bajasImportantes();
+                ventajaLocal += menuSiNo("Tiene bajas importantes para el encuentro?(Convocatoria / lesion / suspension)",10 ,20);
                 bajaLocal = respuestaMenu();
-                ventajaLocal += competenciaInternacional();
+                ventajaLocal += menuSiNo("Competencia internacional proxima", 10, 20);
                 competenciaLocal = respuestaMenu(); 
-                ventajaLocal += necesidadResultado();
+                ventajaLocal += menuSiNo("Tiene necesidad del resultado?", 20, 10);
                 necesidadLocal = respuestaMenu();
-
-                ingresoPuntosLocal();
+                Console.Clear();
 
                 ingresoResultadoslocal();
+                efectividadLocal = calcularPorcentajeEfectividad();
 
                 Console.Clear();
-                mostrarIngresosLocal();
-                Console.WriteLine("Confirmar datos? (S/N)");
-                confirmacion = Console.ReadKey().KeyChar;
-                Console.WriteLine();
-                if (confirmacion == 'N' || confirmacion == 'n') 
+                mostrarIngresos(nombreLocal,bajaLocal,competenciaLocal,necesidadLocal, efectividadLocal, resultados1);
+                do
                 {
-                    menuModificar();
-                    opcionModificar = Console.ReadKey().KeyChar;
-                    eleccionModificar();
-                }
-                
+                    Console.WriteLine("Confirmar datos? (S/N)");
+                    confirmacion = char.ToUpper(Console.ReadKey().KeyChar);
+                    Console.WriteLine();
+                    if (confirmacion == 'N')
+                    {
+                        menuModificar();
+                        opcionModificar = Console.ReadKey().KeyChar;
+                        eleccionModificar(ref nombreLocal, ref bajaLocal,ref competenciaLocal,ref necesidadLocal);
+                        Console.Clear() ;
+                        mostrarIngresos(nombreLocal, bajaLocal, competenciaLocal, necesidadLocal, efectividadLocal, resultados1);
+                    }
+                    else 
+                    {
+                        Console.WriteLine("Opcion incorrecta, ingrese otra opcion");
+                    }
+                } while (confirmacion != 'S');
+                Console.Clear() ;
 
                 //Equipo visitante
                 nombreVisitante = ingresoNombre("Equipo visitante");
-                ventajaVisitante += bajasImportantes();
+                ventajaVisitante += menuSiNo("Tiene bajas importantes para el encuentro?(Convocatoria / lesion / suspension)", 10, 20);
                 bajaVisitante = respuestaMenu();
-                ventajaVisitante += competenciaInternacional();
+                ventajaVisitante += menuSiNo("Competencia internacional proxima", 10, 20);
                 competenciaVisitante = respuestaMenu();
-                ventajaVisitante += necesidadResultado();
+                ventajaVisitante += menuSiNo("Tiene necesidad del resultado?", 20, 10);
                 necesidadVisitante = respuestaMenu();
-
-                Console.WriteLine("Indique cantidad de puntos liga actual");
-                puntosVisitante = int.Parse(Console.ReadLine());
-
                 Console.WriteLine($"Ingrese ultimos 5 resultados de {nombreVisitante} (G / E / P)");
-                ingresoResultados(resultados2);
 
-                mostrarIngresosVisitante();
+                ingresoResultados(resultados2);
+                Console.Clear();
+                efectividadVisitante = calcularPorcentajeEfectividad();
+
+                Console.Clear();
+                mostrarIngresos(nombreVisitante, bajaVisitante, competenciaVisitante, necesidadVisitante, efectividadVisitante, resultados2);
+                do
+                {
+                    Console.WriteLine("Confirmar datos? (S/N)");
+                    confirmacion = char.ToUpper(Console.ReadKey().KeyChar);
+                    Console.WriteLine();
+                    if (confirmacion == 'N')
+                    {
+                        menuModificar();
+                        opcionModificar = Console.ReadKey().KeyChar;
+                        eleccionModificar(ref nombreVisitante, ref bajaVisitante, ref competenciaVisitante,ref necesidadVisitante);
+                        Console.Clear() ;
+                        mostrarIngresos(nombreVisitante, bajaVisitante, competenciaVisitante, necesidadVisitante, efectividadVisitante, resultados2);
+                    }
+                } while (confirmacion == 'N');
+                Console.Clear();
 
                 porcentajeLocal = calcularPorcentaje(resultados1);
                 porcentajeVisitante = calcularPorcentaje(resultados2);
-                
+
                 Console.Clear();
                 
-                compararPorcentajes();
-                compararPuntos();
+                
+                comparar(efectividadLocal, efectividadVisitante, "efectividad");
                 compararVentajas();
-                Console.WriteLine("Desea analizar otro partido?");
-                Console.WriteLine("1. Si");
-                Console.WriteLine("2. No");
-                seguir = Console.ReadKey().KeyChar;
+                do
+                {
+                    Console.WriteLine("Desea analizar otro partido?");
+                    Console.WriteLine("1. Si");
+                    Console.WriteLine("2. No");
+                    seguir = Console.ReadKey().KeyChar;
+                    Console.WriteLine();
+                    if (seguir != '1' && seguir != '2') 
+                    {
+                        Console.Clear();
+                    }
+                } while (seguir != '1' && seguir != '2');
+
             }
             while (seguir == '1');
         }
