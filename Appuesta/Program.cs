@@ -14,16 +14,11 @@ namespace Appuesta
         static void Main(string[] args)
         {
             char respuesta, seguir, confirmacion, opcionModificar;
-            string nombreLocal, nombreVisitante;
-            string bajaLocal , competenciaLocal, necesidadLocal;
-            string bajaVisitante, competenciaVisitante, necesidadVisitante;
-            char[] resultados1 = new char[5];
-            char[] resultados2 = new char[5];
-            double porcentajeLocal, porcentajeVisitante;
+            string nombreLocal, nombreVisitante, bajaLocal, bajaVisitante, competenciaLocal, competenciaVisitante, necesidadVisitante, necesidadLocal;
+            char[] resultados1 = new char[5], resultados2 = new char[5];
+            double porcentajeLocal, porcentajeVisitante, efectividadVisitante, efectividadLocal;
             //Empieza con 10 por ser local
-            int ventajaLocal = 10;
-            int ventajaVisitante = 0;
-            double efectividadVisitante, efectividadLocal;
+            int ventajaLocal = 10, ventajaVisitante = 0;
 
             //Ingreso de nombres de equipos
             string ingresoNombre(string nombre)
@@ -60,7 +55,7 @@ namespace Appuesta
             }
 
             //Ingreso de resultados de equipos en un arreglo. 
-            void ingresoResultados(char[] resultado) 
+            void almacenarResultados(char[] resultado) 
             {
                 for (int i = 0; i < 5; i++)
                 {
@@ -213,17 +208,19 @@ namespace Appuesta
                         cambiarRespuesta(ref necesidad);
                         break;
                     case '6': 
-                        ingresoResultadoslocal();
+                        ingresoResultados(nombre, resultados1);
                         break;
                     default: Console.WriteLine("Opcion incorrecta");
                         break;
                 }
             }
-            void ingresoResultadoslocal() 
+
+            void ingresoResultados(string nombre,char[] resultado) 
             {
-                Console.WriteLine($"Ingrese ultimos 5 resultados de {nombreLocal} (G / E / P)");
-                ingresoResultados(resultados1);
+                Console.WriteLine($"Ingrese ultimos 5 resultados de {nombre} (G / E / P)");
+                almacenarResultados(resultado);
             }
+
             void cambiarRespuesta(ref string res) 
             {
                 if (res == "Si")
@@ -235,11 +232,61 @@ namespace Appuesta
                     res = "Si";
                 }
             }
+
+            void cargaEnfretamientos() 
+            {
+                int ganadosLocal, partidosEmpatados, ganadosVisitante;
+                Console.WriteLine($"Ingrese partidos ganados por {nombreLocal}");
+                ganadosLocal = int.Parse(Console.ReadLine());
+                Console.WriteLine("Ingrese partidos empatados entre si");
+                partidosEmpatados = int.Parse(Console.ReadLine());
+                Console.WriteLine($"Ingrese partidos ganados por {nombreVisitante}");
+                ganadosVisitante = int.Parse(Console.ReadLine());
+            }
+
+            void confirmarDatos(string nombre, string baja, string competencia, string necesidad, double efectividad, char[] resultado)
+            {
+                do
+                {
+                    Console.WriteLine("Confirmar datos? (S/N)");
+                    confirmacion = char.ToUpper(Console.ReadKey().KeyChar);
+                    Console.WriteLine();
+                    if (confirmacion == 'N')
+                    {
+                        menuModificar();
+                        opcionModificar = Console.ReadKey().KeyChar;
+                        eleccionModificar(ref nombre, ref baja, ref competencia, ref necesidad);
+                        Console.Clear();
+                        mostrarIngresos(nombre, baja, competencia, necesidad, efectividad, resultado);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Opcion incorrecta, ingrese otra opcion");
+                    }
+                } while (confirmacion != 'S');
+            }
+       
+            char analizarOtro() 
+            {
+                do
+                {
+                    Console.WriteLine("Desea analizar otro partido?");
+                    Console.WriteLine("1. Si");
+                    Console.WriteLine("2. No");
+                    seguir = Console.ReadKey().KeyChar;
+                    Console.WriteLine();
+                    if (seguir != '1' && seguir != '2')
+                    {
+                        Console.Clear();
+                    }
+                } while (seguir != '1' && seguir != '2');
+                return seguir;
+            }
             //Programa principal
             do
             {
                 Console.Clear();
-                
+
                 //Equipo local 
                 nombreLocal = ingresoNombre("Equipo local");
                 ventajaLocal += menuSiNo("Tiene bajas importantes para el encuentro?(Convocatoria / lesion / suspension)",10 ,20);
@@ -250,29 +297,12 @@ namespace Appuesta
                 necesidadLocal = respuestaMenu();
                 Console.Clear();
 
-                ingresoResultadoslocal();
+                ingresoResultados(nombreLocal, resultados1);
                 efectividadLocal = calcularPorcentajeEfectividad();
 
                 Console.Clear();
                 mostrarIngresos(nombreLocal,bajaLocal,competenciaLocal,necesidadLocal, efectividadLocal, resultados1);
-                do
-                {
-                    Console.WriteLine("Confirmar datos? (S/N)");
-                    confirmacion = char.ToUpper(Console.ReadKey().KeyChar);
-                    Console.WriteLine();
-                    if (confirmacion == 'N')
-                    {
-                        menuModificar();
-                        opcionModificar = Console.ReadKey().KeyChar;
-                        eleccionModificar(ref nombreLocal, ref bajaLocal,ref competenciaLocal,ref necesidadLocal);
-                        Console.Clear() ;
-                        mostrarIngresos(nombreLocal, bajaLocal, competenciaLocal, necesidadLocal, efectividadLocal, resultados1);
-                    }
-                    else 
-                    {
-                        Console.WriteLine("Opcion incorrecta, ingrese otra opcion");
-                    }
-                } while (confirmacion != 'S');
+                confirmarDatos(nombreLocal, bajaLocal, competenciaLocal, necesidadLocal, efectividadLocal, resultados1);
                 Console.Clear() ;
 
                 //Equipo visitante
@@ -283,51 +313,24 @@ namespace Appuesta
                 competenciaVisitante = respuestaMenu();
                 ventajaVisitante += menuSiNo("Tiene necesidad del resultado?", 20, 10);
                 necesidadVisitante = respuestaMenu();
-                Console.WriteLine($"Ingrese ultimos 5 resultados de {nombreVisitante} (G / E / P)");
-
-                ingresoResultados(resultados2);
+                ingresoResultados(nombreVisitante, resultados2);
                 Console.Clear();
                 efectividadVisitante = calcularPorcentajeEfectividad();
 
                 Console.Clear();
                 mostrarIngresos(nombreVisitante, bajaVisitante, competenciaVisitante, necesidadVisitante, efectividadVisitante, resultados2);
-                do
-                {
-                    Console.WriteLine("Confirmar datos? (S/N)");
-                    confirmacion = char.ToUpper(Console.ReadKey().KeyChar);
-                    Console.WriteLine();
-                    if (confirmacion == 'N')
-                    {
-                        menuModificar();
-                        opcionModificar = Console.ReadKey().KeyChar;
-                        eleccionModificar(ref nombreVisitante, ref bajaVisitante, ref competenciaVisitante,ref necesidadVisitante);
-                        Console.Clear() ;
-                        mostrarIngresos(nombreVisitante, bajaVisitante, competenciaVisitante, necesidadVisitante, efectividadVisitante, resultados2);
-                    }
-                } while (confirmacion == 'N');
-                Console.Clear();
+                confirmarDatos(nombreVisitante, bajaVisitante, competenciaVisitante, necesidadVisitante, efectividadVisitante, resultados2);
 
+                Console.Clear();
+                
+                //GENERAL
                 porcentajeLocal = calcularPorcentaje(resultados1);
                 porcentajeVisitante = calcularPorcentaje(resultados2);
-
                 Console.Clear();
-                
-                
-                comparar(efectividadLocal, efectividadVisitante, "efectividad");
+                comparar(efectividadLocal, efectividadVisitante, "efectividad en el torneo local");
+                comparar(porcentajeLocal, porcentajeVisitante, "victorias en los ultimos 5 partidos");
                 compararVentajas();
-                do
-                {
-                    Console.WriteLine("Desea analizar otro partido?");
-                    Console.WriteLine("1. Si");
-                    Console.WriteLine("2. No");
-                    seguir = Console.ReadKey().KeyChar;
-                    Console.WriteLine();
-                    if (seguir != '1' && seguir != '2') 
-                    {
-                        Console.Clear();
-                    }
-                } while (seguir != '1' && seguir != '2');
-
+                analizarOtro();
             }
             while (seguir == '1');
         }
